@@ -10,6 +10,7 @@ from tqdm import tqdm
 import os
 import json
 from PIL import Image
+import subprocess
 
 # Define the ImageCaptioningDataset class (unchanged)
 class ImageCaptioningDataset(torch.utils.data.Dataset):
@@ -59,6 +60,10 @@ def setup(rank, world_size):
 def cleanup():
     dist.destroy_process_group()
 
+def run_nvidia_smi():
+    result = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE, text=True)
+    print(result.stdout)
+    
 def train(rank, world_size):
     setup(rank, world_size)
     
@@ -138,6 +143,9 @@ def train(rank, world_size):
                 optimizer.zero_grad()
 
             total_train_loss += loss.item() * gradient_accumulation_steps
+            if rank == 0 and (step + 1) % 10 == 0:
+                print(f"\nGPU status after iteration {step + 1}:")
+                run_nvidia_smi()
 
         avg_train_loss = total_train_loss / len(train_dataloader)
         if rank == 0:
