@@ -112,11 +112,20 @@ def main():
         total_train_loss = 0
         optimizer.zero_grad()
         for step, batch in enumerate(tqdm(train_dataloader, desc=f"Training Epoch {epoch+1}")):
-            batch = {k: v.to("cuda") for k, v in batch.items()}  # Use device from Accelerator (change)
+    # Ensure input tensors are on the correct devices
+    # Move pixel_values to the same device as vision encoder
+            pixel_values_device = model.vision_model.device
+            batch['pixel_values'] = batch['pixel_values'].to(pixel_values_device)
+
+            # Move input_ids and attention_mask to the same device as the text encoder (Q-Former)
+            qformer_device = model.qformer.device
+            batch['input_ids'] = batch['input_ids'].to(qformer_device)
+            batch['attention_mask'] = batch['attention_mask'].to(qformer_device)
+
             labels = batch['input_ids'].clone()
             labels[labels == processor.tokenizer.pad_token_id] = -100
 
-            # with accelerator.autocast():  # Use accelerator's autocast (change)
+            # Forward pass
             outputs = model(
                 pixel_values=batch['pixel_values'],
                 input_ids=batch['input_ids'],
@@ -125,12 +134,8 @@ def main():
             )
             loss = outputs.loss
 
-            # accelerator.backward(loss)  # Use accelerator's backward (change)
+            # Perform backward pass and optimization steps as usual
             loss.backward()
-
-            # if (step + 1) % gradient_accumulation_steps == 0:
-            #     accelerator.clip_grad_norm_(model.parameters(), max_norm=1.0)  # Optional: clip gradients (change)
-            #     accelerator.step(optimizer)  # Use accelerator's step (change)
             scheduler.step()
             optimizer.zero_grad()
 
