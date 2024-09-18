@@ -14,6 +14,6 @@
 source ~/miniconda3/bin/activate
 
 
-srun python -m train3
+srun python -m train_distributed
 
 
