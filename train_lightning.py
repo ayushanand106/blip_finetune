@@ -44,8 +44,8 @@ class ImageCaptioningModule(LightningModule):
     def __init__(self, model_name, learning_rate=1e-4):
         super().__init__()
         self.save_hyperparameters()
-        self.model = Blip2ForConditionalGeneration.from_pretrained(model_name)
-        self.processor = Blip2Processor.from_pretrained(model_name)
+        self.model = Blip2ForConditionalGeneration.from_pretrained(model_name, cache_dir="/leonardo_scratch/fast/EUHPC_E03_068/.cache/")
+        self.processor = Blip2Processor.from_pretrained(model_name, cache_dir="/leonardo_scratch/fast/EUHPC_E03_068/.cache/")
 
         # Freeze vision encoder and language model, unfreeze Q-Former
         for name, param in self.model.named_parameters():
@@ -106,12 +106,12 @@ def main():
     train_dataset = ImageCaptioningDataset(
         image_dir='/leonardo_scratch/fast/EUHPC_E03_068/.cache/r2r/',
         captions_file='./train_annotations.json',
-        processor=Blip2Processor.from_pretrained("Salesforce/blip2-flan-t5-xl")
+        processor=Blip2Processor.from_pretrained("Salesforce/blip2-flan-t5-xl", cache_dir="/leonardo_scratch/fast/EUHPC_E03_068/.cache/")
     )
     val_dataset = ImageCaptioningDataset(
         image_dir='/leonardo_scratch/fast/EUHPC_E03_068/.cache/r2r/',
         captions_file='./val_annotations.json',
-        processor=Blip2Processor.from_pretrained("Salesforce/blip2-flan-t5-xl")
+        processor=Blip2Processor.from_pretrained("Salesforce/blip2-flan-t5-xl", cache_dir="/leonardo_scratch/fast/EUHPC_E03_068/.cache/")
     )
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
