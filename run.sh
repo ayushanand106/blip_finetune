@@ -1,5 +1,4 @@
-
-# !/bin/bash
+#!/bin/bash
 #SBATCH --account EUHPC_E03_068
 #SBATCH -p boost_usr_prod
 #SBATCH --time 16:00:00     # format: HH:MM:SS
@@ -9,11 +8,12 @@
 #SBATCH --gres=gpu:4          # 4 gpus per node out of 4
 #SBATCH --mem=123000          # memory per node out of 494000MB (481GB)
 #SBATCH --job-name=purple_team
-#SBATCH --output=slurm_out/purpleteam-%j-%t.out
+#SBATCH --output=/leonardo_work/EUHPC_E03_068/safellm-v0/blip_finetune/output/blip-%j-%t.out
 
 
 source ~/miniconda3/bin/activate
 
 
-srun python -m train_compute_no_limit.py
+srun python -m train3
+
 
